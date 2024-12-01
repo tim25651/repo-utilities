@@ -14,14 +14,12 @@ from io import StringIO
 from os import PathLike
 from pathlib import Path
 from subprocess import DEVNULL
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TypeAlias
 
 import gnupg
+from gnupg._parsers import Sign
 
 from repo_utilities.temp import TemporaryDirectory
-
-if TYPE_CHECKING:
-    from gnupg._parsers import Sign
 
 logger = logging.getLogger("repo_utilities")
 
@@ -30,6 +28,21 @@ StrPath: TypeAlias = str | PathLike[str]
 
 class KeyCreationError(Exception):
     """Key creation failed."""
+
+
+# monkeypatch warning handler
+_orig_handle_status = Sign._handle_status  # noqa: SLF001
+
+
+def _patched_handle_status(self: Sign, key: str, value: str) -> None:
+    """Monkeypatch to handle the status of GPG operations."""
+    if key == "WARNING":
+        self.status = key.replace("_", " ").lower()
+    else:
+        _orig_handle_status(self, key, value)
+
+
+Sign._handle_status = _patched_handle_status  # noqa: SLF001
 
 
 class GPG2(gnupg.GPG):
