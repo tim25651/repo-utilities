@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("repo_utilities")
 
 
-DEBUG = True
+DEBUG = False
 
 StrPath: TypeAlias = str | PathLike[str]
 LICENSES: TypeAlias = Literal[
