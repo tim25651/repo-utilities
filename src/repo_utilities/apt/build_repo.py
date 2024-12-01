@@ -93,8 +93,13 @@ def get_packages_hashes(
     for header, hash_func in header_hashes:
         lines.append(f"{header}:")
         for elem in all_packages:
-            for path, content in elem:
+            for path, raw_content in elem:
                 rel_path = path.relative_to(path.parent.parent.parent)
+                content = (
+                    raw_content.encode("utf-8")
+                    if isinstance(raw_content, str)
+                    else raw_content
+                )
                 char_count = len(content)
                 hash_str = hash_func(content)
                 lines.append(f" {hash_str} {char_count} {rel_path}")
