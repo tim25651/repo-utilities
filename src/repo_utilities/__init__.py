@@ -9,6 +9,7 @@ from repo_utilities.ext import (
     ExtensionError,
     filter_exts,
 )
+from repo_utilities.extract import extract
 from repo_utilities.gpg import GPG2, TempGPG, create_priv_key, sign_repo
 from repo_utilities.session import CacheSession, ConnectionKeeper
 from repo_utilities.temp import TemporaryDirectory
@@ -30,6 +31,7 @@ __all__ = [
     "EMPTY_HASH",
     "FOUR_MB",
     "GPG2",
+    "extract",
     "CacheSession",
     "ConnectionKeeper",
     "ExtensionError",
