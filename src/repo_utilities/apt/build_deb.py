@@ -46,6 +46,7 @@ LICENSES: TypeAlias = Literal[
     "custom",
 ]
 TYPES: TypeAlias = Literal["s", "i", "l", "p"]
+IGNORED_DIRS = {"__pycache__"}
 
 
 @dataclass(frozen=True)
@@ -156,16 +157,26 @@ def write_install_file(
         if file.is_file():
             file_hierarchy.setdefault(file.parent, []).append(file)
 
-    fixed_files: dict[Path, Path] = {}
+    fixed_files: set[Path] = set()
     for parent, subfiles in file_hierarchy.items():
-        if not subfiles:
+        if parent.name in IGNORED_DIRS:  # like __pycache__
             continue
-        if len(subfiles) == 1:
-            print(f"Adding {subfiles[0]} explicitly for {parent}")
-            fixed_files[parent] = subfiles[0]
-        else:
-            print(f"Adding {parent}/* as shortcut for {len(subfiles)} children")
-            fixed_files[parent] = Path("*")
+        if not subfiles:  # no files in this directory
+            continue
+        fixed_files.add(parent)
+
+    def _is_parent_in_set(child: Path, _set: set[Path]) -> bool:
+        if Path("/") in _set or Path() in _set:  # root dir or current dir
+            raise ValueError("Root directory or current directory is in set")
+        if child.parent == child: # . or /
+            return False
+        if child.parent in _set:
+            return True
+        return _is_parent_in_set(child.parent, _set)
+
+    fixed_files = {parent for parent in fixed_files if not _is_parent_in_set(parent, fixed_files)}
+
+    logger.debug("Filtered fixed files: %s", fixed_files)
 
     allowed_dirs = {
         install_dir / parent.relative_to(root_dir) for parent in file_hierarchy
@@ -173,10 +184,12 @@ def write_install_file(
 
     install_file = source_dir / "debian" / "install"
     with install_file.open("w") as f:
-        for file in sorted(set(fixed_files)):
+        for file in sorted(fixed_files):
             target = install_dir / file.relative_to(root_dir)
             target_str = str(target.parent).removeprefix("/")
             f.write(f"{file.relative_to(source_dir)} {target_str}\n")
+
+    logger.debug(install_file.read_text())
 
     return allowed_dirs
 
