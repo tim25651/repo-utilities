@@ -150,26 +150,25 @@ def write_install_file(
     source_dir = Path(source_dir).resolve()
     root_dir = root_dir or source_dir
     root_dir = Path(root_dir).resolve()
-    parent_files: dict[Path, list[Path]] = {}
+    file_hierarchy: dict[Path, list[Path]] = {}
     for raw_file in files:
         file = Path(raw_file)
         if file.is_file():
-            parent = file.parent
-            if parent not in parent_files:
-                parent_files[parent] = []
-            parent_files[parent].append(file)
+            file_hierarchy.setdefault(file.parent, []).append(file)
 
-    fixed_files: list[Path] = []
-    for parent, children in parent_files.items():
-        if parent.parent in parent_files:
+    fixed_files: dict[Path, Path] = {}
+    for parent, subfiles in file_hierarchy.items():
+        if not subfiles:
             continue
-        if len(children) == 1:
-            fixed_files.append(children[0])
+        if len(subfiles) == 1:
+            print(f"Adding {subfiles[0]} explicitly for {parent}")
+            fixed_files[parent] = subfiles[0]
         else:
-            fixed_files.append(children[0].with_name("*"))
+            print(f"Adding {parent}/* as shortcut for {len(subfiles)} children")
+            fixed_files[parent] = Path("*")
 
     allowed_dirs = {
-        install_dir / parent.relative_to(root_dir) for parent in parent_files
+        install_dir / parent.relative_to(root_dir) for parent in file_hierarchy
     }
 
     install_file = source_dir / "debian" / "install"

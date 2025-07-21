@@ -6,42 +6,38 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "repo-utilities"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
   "rattler-bindings @ git+https://www.github.com/audivir/rattler-bindings",
-    "dpkg-scanpackages-py @ git+https://www.github.com/tim25651/dpkg-scanpackages-py.git",
-    "jinja2",
-    "requests",
-    "psutil",
-    "gnupg",
-    "playwright"
+  "dpkg-scanpackages-py @ git+https://www.github.com/tim25651/dpkg-scanpackages-py.git",
+  "jinja2",
+  "requests",
+  "psutil",
+  "gnupg",
+  "playwright",
 ]
 requires-python = ">=3.9"
-authors = [
-    {name = "Tim Hörmann", email = "pypi@audivir.de"},
-]
+authors = [{ name = "Tim Hörmann", email = "pypi@audivir.de" }]
 description = "Create and sign debian packages and apt repos."
 readme = "README.md"
 classifiers = [
-    "Development Status :: 1 - Planning",
-    "Private :: Do Not Upload",
-    "Programming Language :: Python :: 3",
+  "Development Status :: 1 - Planning",
+  "Private :: Do Not Upload",
+  "Programming Language :: Python :: 3",
 ]
 
 [project.optional-dependencies]
 dev = ["coverage[toml]", "mypy", "pylint", "pytest"]
 
 [project.scripts]
-build-apt-deb="repo_utilities.apt.cli:build_deb_cli"
-build-apt-repo="repo_utilities.apt.cli:build_repo_cli"
-build-apt-meta="repo_utilities.apt.cli:build_meta_cli"
-build-brew-tap="repo_utilities.brew.cli:build_tap_cli"
+build-apt-deb = "repo_utilities.apt.cli:build_deb_cli"
+build-apt-repo = "repo_utilities.apt.cli:build_repo_cli"
+build-apt-meta = "repo_utilities.apt.cli:build_meta_cli"
+build-brew-tap = "repo_utilities.brew.cli:build_tap_cli"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = [
-    "repo_utilities*",
-]
+include = ["repo_utilities*"]
 
 # pyproject-tools
 
